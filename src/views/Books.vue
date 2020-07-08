@@ -1,58 +1,74 @@
 <template>
   <div>
     <v-container class="ma-0 pa-0" grid-list-sm>
-      <v-subheader>
-        All Books 
-      </v-subheader>
-      <v-layout wrap>
-        <v-flex v-for="(book) in books" :key="`book-`+book.id" xs6>
+      <v-subheader>All Books</v-subheader>
+      <v-layout wrap v-if="booksPage">
+        <v-flex v-for="(book) in booksPage.books" :key="`book-`+book.id" xs6>
           <book-item :book="book" />
         </v-flex>
       </v-layout>
     </v-container>
 
     <template>
-      <div class="text-center">
-        <v-pagination
-          v-model="page"
-          @input="go"
-          :length="lengthPage"
-          :total-visible="5"
-        ></v-pagination>
+      <div class="text-center" v-if="!$apollo.loading">
+        <button v-if="showMoreEnabled" @click="showMore">Show more</button>
       </div>
     </template>
   </div>
 </template>
 <script>
+import { BOOKS_PAGE_QUERY } from "../constants/graphql";
+
+const pageSize = 4;
+
 export default {
   components: {
-    BookItem: () => import(/* webpackChunkName: "book-item" */ '@/components/BookItem.vue')
+    BookItem: () =>
+      import(/* webpackChunkName: "book-item" */ "@/components/BookItem.vue")
   },
   data: () => ({
-    books: [],
     page: 0,
-    lengthPage: 0
+    showMoreEnabled: true
   }),
-  created(){
-    this.go()
+  apollo: {
+    booksPage: {
+      query: BOOKS_PAGE_QUERY,
+      variables() {
+        return {
+          page: 0,
+          size: pageSize
+        };
+      }
+    }
   },
   methods: {
-      go(){
-        let url = '/books?page='+this.page
-        this.axios.get(url)
-        .then((response) => {
-            let { data } = response.data
-            let { meta } = response.data
-            this.books = data
-            // jumlah halaman di dapat dari meta endpoint books
-            this.lengthPage = meta.last_page 
-            this.page = meta.current_page
-        })
-        .catch((error) => {
-            let { responses } = error
-            console.log(responses)
-        }) 
-      }
+    showMore() {
+      this.page++;
+      // Fetch more data and transform the original result
+      this.$apollo.queries.booksPage.fetchMore({
+        // New variables
+        variables: {
+          page: this.page,
+          pageSize
+        },
+        // Transform the previous result with new data
+        updateQuery: (previousResult, { fetchMoreResult }) => {
+          const newBooks = fetchMoreResult.booksPage.books;
+          const hasMore = fetchMoreResult.booksPage.hasMore;
+
+          this.showMoreEnabled = hasMore;
+
+          return {
+            booksPage: {
+              __typename: previousResult.booksPage.__typename,
+
+              books: [...previousResult.booksPage.books, ...newBooks],
+              hasMore
+            }
+          };
+        }
+      });
+    }
   }
 };
 </script>
