@@ -89,6 +89,7 @@ export const GET_CATEGORY_BY_SLUG = gql`
     }
   }
 `
+
 export const ALL_CATEGORY_QUERY = gql`
   query AllCategoryQuery($first: Int!, $page: Int!) {
     categories(first: $first, page: $page) {
@@ -154,6 +155,77 @@ export const RANDOMIZED_CATEGORY = gql`
       name
       slug
       image
+    }
+  }
+`
+
+export const BOOKS_SEARCH_QUERY = gql`
+  query BooksSearchQuery($col_name: String!, $kw: String!) {
+    booksSearch(col_name: $col_name, kw: $kw) {
+      id
+      title
+      cover
+      slug
+      description
+      author
+      publisher
+      views
+      price
+      created_at
+      updated_at
+    }
+  }
+`
+
+export const All_CUSTOMERS_QUERY = gql`
+  query customersAllQuery {
+    customersAll {
+      id
+      name
+      username
+      remember_token
+      email
+      roles
+      address
+      phone
+      avatar
+      status
+      password
+      orders
+      updated_at
+      created_at
+    }
+  }
+`
+export const CUSTOMER_LOGIN_QUERY = gql`
+  query CustomerLoginQuery($email: String!, $password: String!) {
+    customerLogin(email: $email, password: $password) {
+      id
+      name
+      username
+      remember_token
+      email
+      roles
+      address
+      phone
+      avatar
+      status
+      password
+      updated_at
+      created_at
+    }
+  }
+`
+export const CUSTOMER_REGISTER = gql`
+  mutation CreateCustomerQuery(
+    $name: String!
+    $email: String!
+    $password: String!
+  ) {
+    createCustomer(name: $name, email: $email, password: $password) {
+      name
+      email
+      password
     }
   }
 `

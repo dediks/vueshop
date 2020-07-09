@@ -79,8 +79,6 @@ export default {
     // 'tags' data property on vue instance
     findBookBy: {
       query: GET_BOOK_BY_SLUG,
-      pollInterval: 300,
-      // Reactive variables
       variables() {
         return {
           identifier: "slug",
